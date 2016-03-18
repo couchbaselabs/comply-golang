@@ -108,23 +108,53 @@ func RetrieveAllCompanyHandler(w http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(w).Encode(curCompany)
 }
 
+func AddDefaultCompany() {
+	var defaultCompany SessionCompany
+	defaultCompany.Company.Active = true
+	defaultCompany.Company.Name = "Couchbase"
+	defaultCompany.Company.Address.Street = "2440 W El Camino Real #101"
+	defaultCompany.Company.Address.City = "Mountain View"
+	defaultCompany.Company.Address.State = "California"
+	defaultCompany.Company.Address.Zip = 94040
+	defaultCompany.Company.Phone = "650-417-7500"
+	defaultCompany.Company.Website = "www.couchbase.com"
+
+	curCompany, err := defaultCompany.Create()
+	if err != nil {
+		fmt.Println("Error Creating Default Company:", err)
+		return
+	}
+	fmt.Println("Default Company Created.")
+	fmt.Println(curCompany)
+}
+
 func main() {
 	// Cluster connection and bucket for couchbase
 	cluster, _ := gocb.Connect("couchbase://192.168.99.100")
 	bucket, _ = cluster.OpenBucket("comply", "")
+
+	// Add a Default Company
+	AddDefaultCompany()
+
 	// Http Routing
 	r := mux.NewRouter()
+
+	// User Routes
 	r.HandleFunc("/api/user/login/{email}/{pass}", LoginHandler).Methods("GET")
 	r.HandleFunc("/api/user/getAll", RetrieveAllUserHandler).Methods("GET")
 	r.HandleFunc("/api/user/get/{userId}", RetrieveUserHandler).Methods("GET")
 	r.HandleFunc("/api/user/create", CreateLoginHandler).Methods("POST")
 
+	// Company Routes
 	r.HandleFunc("/api/company/get/{companyId}", RetrieveCompanyHandler).Methods("GET")
 	r.HandleFunc("/api/company/getAll", RetrieveAllCompanyHandler).Methods("GET")
 	r.HandleFunc("/api/company/create", CreateCompanyHandler).Methods("POST")
 
-	//r.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
-	//http.Handle("/", http.FileServer(http.Dir("./static")))
+	// Static Directories for Angular 2.0 APP
+	p := http.StripPrefix("/", http.FileServer(http.Dir("./public/src/")))
+	n := http.StripPrefix("/node_modules", http.FileServer(http.Dir("./node_modules/")))
+	r.PathPrefix("/node_modules/").Handler(n)
+	r.PathPrefix("/").Handler(p)
 
 	fmt.Printf("Starting server on :3000\n")
 	http.ListenAndServe(":3000", r)

@@ -58,7 +58,7 @@ func (s *SessionProject) Create() (*Project, error) {
 	return &s.Project, nil
 }
 
-func (s *SessionProject) Retrieve(id string) ([]interface{}, error) {
+func (s *SessionProject) Retrieve(id string) (interface{}, error) {
 	// Retrieve a single Project instance from the id.  Uses a get operation
 	// against the database and returns the Project object to the front end
 	// application.
@@ -67,7 +67,7 @@ func (s *SessionProject) Retrieve(id string) ([]interface{}, error) {
 		"FROM`comply` USE KEYS c.owner)[0] as owner,(SELECT _id,_type,active, " +
 		"address,company,createdON,name,`password`,phone FROM `comply` USE KEYS " +
 		"c.users) AS users, (SELECT _id,name,description,owner,assignedTo,Users, " +
-		"history,permalink FROM `comply` USE KEYS c.tasks), permalink from " +
+		"history,permalink FROM `comply` USE KEYS c.tasks) as tasks, permalink from " +
 		" `comply` c WHERE c._id=$1")
 	var myParams []interface{}
 	myParams = append(myParams, id)
@@ -76,16 +76,11 @@ func (s *SessionProject) Retrieve(id string) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Interfaces for handling streaming return values
-	var retValues []interface{}
-	var row interface{}
+	// Interface for return values
+	var retValues interface{}
 
-	// Stream the values returned from the query into an untyped and unstructred
-	// array of interfaces
-	for rows.Next(&row) {
-		retValues = append(retValues, row)
-	}
-
+	// Put the query results into the return interface
+	_ = rows.One(&retValues)
 	return retValues, nil
 }
 

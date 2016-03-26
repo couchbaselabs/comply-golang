@@ -37,7 +37,7 @@ type SessionTask struct {
 	Task Task
 }
 
-func (s *SessionTask) Create(projectID string) ([]interface{}, error) {
+func (s *SessionTask) Create(projectID string) (interface{}, error) {
 	// Generate a faux uuid
 	uuid := GenUUID()
 	t := int64(time.Now().UnixNano())
@@ -99,15 +99,15 @@ func (s *SessionTask) Create(projectID string) ([]interface{}, error) {
 		return nil, err
 	}
 
-	// Interfaces for handling streaming return values
-	var retValues []interface{}
-	var row interface{}
+	// Interfaces for handling return values
+	var retValues interface{}
 
-	// Stream the values returned from the query into an untyped and unstructred
-	// array of interfaces
-	for rows.Next(&row) {
-		retValues = append(retValues, row)
+	// Stream the values returned from the query into an untyped interfaces
+	err = rows.One(&retValues)
+	if err != nil {
+		return nil, err
 	}
+
 	return retValues, nil
 
 }
@@ -124,7 +124,7 @@ func (s *SessionTask) Retrieve(id string) ([]interface{}, error) {
 		"(SELECT _id,_type,active,address,company,createdON,name,`password`,phone " +
 		"FROM`comply` USE KEYS c.owner)[0] as owner,(SELECT _id,_type,active,address," +
 		"company,createdON,name,`password`,phone FROM `comply` USE KEYS c.users) AS " +
-		"users, permalink from `comply` c WHERE c._id=$1 ")
+		"users, permalink from `comply` c WHERE c._id=$1")
 
 	// Parameters interface to replace $1 with correct parameter
 	var myParams []interface{}
@@ -158,7 +158,7 @@ func (s *SessionTask) RetrieveAssignedToUser(userID string) ([]interface{}, erro
 		"(SELECT _id,_type,active,address,company,createdON,name,`password`,phone " +
 		"FROM`comply` USE KEYS c.owner)[0] as owner,(SELECT _id,_type,active,address," +
 		"company,createdON,name,`password`,phone FROM `comply` USE KEYS c.users) AS " +
-		"users, permalink from `comply` c WHERE c.assignedTo=$1 ")
+		"users, permalink from `comply` c WHERE c.assignedTo=$1")
 
 	// Parameters interface to replace $1 with correct parameter
 	var myParams []interface{}

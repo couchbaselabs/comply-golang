@@ -200,9 +200,7 @@ func CreateTaskHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	var sessionTask SessionTask
 	_ = json.NewDecoder(req.Body).Decode(&sessionTask.Task)
-	fmt.Printf("%+v", sessionTask.Task)
 	curTask, err := sessionTask.Create(vars["projectId"])
-	fmt.Printf("%+v", curTask)
 	if err != nil {
 		w.WriteHeader(401)
 		w.Write([]byte(err.Error()))
@@ -245,6 +243,62 @@ func RetrieveTaskAssignedToUser(w http.ResponseWriter, req *http.Request) {
 	} else {
 		json.NewEncoder(w).Encode(curTask)
 	}
+}
+
+func AddUserToTaskHandler(w http.ResponseWriter, req *http.Request) {
+	var t struct {
+		TaskID string `json:"taskId"`
+		Email  string `json:"email"`
+	}
+	_ = json.NewDecoder(req.Body).Decode(&t)
+	var sessionTask SessionTask
+	curUser, err := sessionTask.AddUserToTask(t.TaskID, t.Email)
+	if err != nil {
+		w.WriteHeader(401)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(curUser)
+}
+
+func AssignUserToTaskHandler(w http.ResponseWriter, req *http.Request) {
+	var t struct {
+		TaskID string `json:"taskId"`
+		UserID string `json:"userId"`
+		Log    string `json:"log"`
+	}
+	_ = json.NewDecoder(req.Body).Decode(&t)
+	var sessionTask SessionTask
+	curUser, err := sessionTask.AssignToUser(t.TaskID, t.UserID)
+	if err != nil {
+		w.WriteHeader(401)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(curUser)
+}
+
+func AddHistoryToTaskHandler(w http.ResponseWriter, req *http.Request) {
+	var t struct {
+		TaskID string `json:"taskId"`
+		UserID string `json:"userId"`
+		Log    string `json:log`
+	}
+	_ = json.NewDecoder(req.Body).Decode(&t)
+	var sessionTask SessionTask
+	curLog, err := sessionTask.AddHistoryToTask(t.TaskID, t.UserID, t.Log)
+	if err != nil {
+		w.WriteHeader(401)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(curLog)
 }
 
 func AddDefaultCompany() {
@@ -331,9 +385,9 @@ func main() {
 	r.HandleFunc("/api/task/getAssignedTo/{userId}", RetrieveTaskAssignedToUser).Methods("GET")
 
 	// TO BE ADDED LATER
-	//r.HandleFunc("/api/task/addUser").Methods("POST")
-	//r.HandleFunc("/api/task/assignUser").Methods("POST")
-	//r.HandleFunc("/api/task/addHistory").Methods("POST")
+	r.HandleFunc("/api/task/addUser", AddUserToTaskHandler).Methods("POST")
+	r.HandleFunc("/api/task/assignUser", AssignUserToTaskHandler).Methods("POST")
+	r.HandleFunc("/api/task/addHistory", AddHistoryToTaskHandler).Methods("POST")
 	//r.HandleFunc("/api/task/addPhoto").Methods("POST")
 
 	// Static Directories for Angular 2.0 APP

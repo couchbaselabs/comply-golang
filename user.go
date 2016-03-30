@@ -13,7 +13,7 @@ type Session struct {
 
 // User Struct Type
 type User struct {
-	Type      string `json:"_type"`
+	Type      string `json:"_type,omitempty"`
 	ID        string `json:"_id"`
 	CreatedOn string `json:"createdON"`
 	Name      struct {
@@ -37,27 +37,29 @@ type User struct {
 func (u *Session) Login(email string, password string) (*User, error) {
 	// Login a single user.   Uses a N1QL query to retrieve a single instance
 	// and return the user object back to the front end application.
-	myQuery := gocb.NewN1qlQuery("SELECT * FROM `comply` " +
-		"WHERE _type = 'User' and email='" + email + "' ")
-	rows, err := bucket.ExecuteN1qlQuery(myQuery, nil)
+	myQuery := gocb.NewN1qlQuery("SELECT _id,active,address,company,createdON," +
+		"email,name,`password`,phone FROM `comply` " +
+		"WHERE _type = 'User' and email='" + email + "' ").Consistency(gocb.RequestPlus)
 
-	// Wrapper struct needed for parsing results from N1QL
-	// The results will always come wrapped in the "bucket" name
-	var wrapUser struct {
-		User User `json:"comply"`
+	rows, err := bucket.ExecuteN1qlQuery(myQuery, nil)
+	if err != nil {
+		return nil, err
 	}
 
-	// Use the .One method to retrieve the first result.   As
-	// this is retrieving a specific instance, we only need the first result
-	err = rows.One(&wrapUser)
+	// Interfaces for handling streaming return values
+	var user User
+
+	// Stream the values returned from the query into an untyped and unstructred
+	// array of interfaces
+	err = rows.One(&user)
 	if err != nil {
 		return nil, errors.New("User Not Found")
 	}
 
 	// Check the password, compare.  If correct return the user object.
 	// NOTE: for demonstration purposes, this approach is NOT SECURE
-	if wrapUser.User.Password == password {
-		return &wrapUser.User, nil
+	if user.Password == password {
+		return &user, nil
 	}
 	return nil, errors.New("Password is invalid")
 }

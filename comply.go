@@ -147,7 +147,13 @@ func RetrieveProjectMemberOfHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(curProject)
+	if curProject == nil {
+		// Special cae to not pass "null" back to front end framework
+		bytes := []byte(`[]`)
+		w.Write(bytes)
+	} else {
+		json.NewEncoder(w).Encode(curProject)
+	}
 }
 
 func RetrieveProjectOwnerHandler(w http.ResponseWriter, req *http.Request) {
@@ -161,7 +167,13 @@ func RetrieveProjectOwnerHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(curProject)
+	if curProject == nil {
+		// Special cae to not pass "null" back to front end framework
+		bytes := []byte(`[]`)
+		w.Write(bytes)
+	} else {
+		json.NewEncoder(w).Encode(curProject)
+	}
 }
 
 func CreateProjectHandler(w http.ResponseWriter, req *http.Request) {
@@ -238,7 +250,7 @@ func RetrieveTaskAssignedToUser(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(200)
 	if curTask == nil {
 		// Special cae to not pass "null" back to front end framework
-		bytes := []byte(`{"":""}`)
+		bytes := []byte(`[]`)
 		w.Write(bytes)
 	} else {
 		json.NewEncoder(w).Encode(curTask)

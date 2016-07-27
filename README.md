@@ -57,6 +57,6 @@ From the web browser, navigate to **http://localhost:3000** to see the applicati
 
 Couchbase - [http://www.couchbase.com](http://www.couchbase.com)
 
-Couchbase Compliance Demo with Node.js - [https://github.com/couchbaselabs/comply](https://github.com/couchbaselabs/comply)
+Couchbase Compliance Demo with Node.js - [https://github.com/couchbaselabs/comply-nodejs](https://github.com/couchbaselabs/comply-nodejs)
 
 Couchbase Compliance Demo with Java - [https://github.com/couchbaselabs/comply-java](https://github.com/couchbaselabs/comply-java)

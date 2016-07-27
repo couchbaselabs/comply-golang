@@ -1,0 +1,10 @@
+public
+angular/dist
+angular/public
+angular/node_modules
+
+comply-golang
+
+.DS_Store*
+Thumbs.db*
+~*

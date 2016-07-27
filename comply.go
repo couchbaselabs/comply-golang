@@ -363,7 +363,7 @@ func SliceItemExists(a string, list []string) bool {
 
 func main() {
 	// Cluster connection and bucket for couchbase
-	cluster, _ := gocb.Connect("couchbase://192.168.99.100")
+	cluster, _ := gocb.Connect("couchbase://localhost")
 	bucket, _ = cluster.OpenBucket("comply", "")
 
 	// Add a Default Company
@@ -403,9 +403,7 @@ func main() {
 	//r.HandleFunc("/api/task/addPhoto").Methods("POST")
 
 	// Static Directories for Angular 2.0 APP
-	p := http.StripPrefix("/", http.FileServer(http.Dir("./public/src/")))
-	n := http.StripPrefix("/node_modules", http.FileServer(http.Dir("./node_modules/")))
-	r.PathPrefix("/node_modules/").Handler(n)
+	p := http.StripPrefix("/", http.FileServer(http.Dir("./public/")))
 	r.PathPrefix("/").Handler(p)
 
 	fmt.Printf("Starting server on :3000\n")

@@ -61,7 +61,7 @@ export class TasksPage {
             users: [],
             history: []
         }).then((result) => {
-            this.project.tasks.push(result[0]);
+            this.project.tasks.push(result);
         }, (error) => {
             console.error(error);
         });
